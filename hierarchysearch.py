@@ -30,8 +30,8 @@ class Body(object):
         return self.root.is_part(body_part, new_root)
 
 
-    def print_state(self):
-        self.root.print_state(0)
+    def get_state(self):
+        return self.root.get_state(0)
 
 
 class BodyPart(object):
@@ -172,7 +172,7 @@ class BodyPart(object):
                 part.deselect(body_part)
 
 
-    def print_state(self, level):
+    def get_state(self, level):
         """ prints in a hierarchical fashion, where its level is denoted
         by the amount of tabs within its suffix
         """
@@ -183,14 +183,16 @@ class BodyPart(object):
         else:
             middle = " "
 
-        print (beginning + "[" + middle + "] " + self.name)
+        state =  (beginning + "[" + middle + "] " + self.name)
 
         if self.children != []:
             for part in self.children:
-                part.print_state(level + 1)
+                state += "\n" + part.get_state(level + 1)
+
+        return state
         
 
-def intiaialize_body():
+def initialize_body():
     """ instantiates body parts and initializes body """
     ## creating parts within lungs
     # right lung
@@ -222,10 +224,11 @@ def intiaialize_body():
     chest = BodyPart("Chest", [lungs, heart])
 
     # the item to be manipulated
-    return(Body(chest))
+    return Body(chest)
 
 
 def parse_user_input(user_input):
+    ''' separates user input by the "of the" string '''
     u_input_arr = user_input.split(" of the ")
     for i in u_input_arr:
         if i[:4] == "the ":
@@ -239,11 +242,11 @@ if __name__ == '__main__':
     SELECT_CMDS = ["s", "select"]
     DESELECT_CMDS = ["d", "deselect"]
 
-    body = intiaialize_body()
+    body = initialize_body()
     
     while True:
         print ("\nThis is the current layout: \n")
-        body.print_state()
+        print(body.get_state())
         print ("\n")
         print ("What would you like to do?")
         print (""" 
@@ -279,8 +282,6 @@ if __name__ == '__main__':
             else:
                 print("\nThat body part does not exist!")
                 
-                
-
         else:
             print("Please choose a valid command.")
 
