@@ -19,15 +19,21 @@ class Body(object):
 
 
     def select(self, body_part, new_root=None):
-        self.root.select(body_part, new_root)
+        if new_root is not None:
+            new_root = new_root.lower()
+        self.root.select(body_part.lower(), new_root)
 
 
     def deselect(self, body_part, new_root=None):
-        self.root.deselect(body_part, new_root)
+        if new_root is not None:
+            new_root = new_root.lower()
+        self.root.deselect(body_part.lower(), new_root)
 
     
     def has_part(self, body_part, new_root=None):
-        return self.root.is_part(body_part, new_root)
+        if new_root is not None:
+            new_root = new_root.lower()
+        return self.root.is_part(body_part.lower(), new_root)
 
 
     def get_state(self):
@@ -210,7 +216,7 @@ def initialize_body():
     # initialization of lungs
     right_lung = BodyPart("Right Lung", right_lung_internal)
     left_lung = BodyPart("Left Lung", left_lung_internal)
-    lungs = BodyPart("Lungs", [left_lung, right_lung])
+    lungs = BodyPart("Lungs", [right_lung, left_lung])
 
     # setting up parts within heart
     heart = BodyPart("Heart")

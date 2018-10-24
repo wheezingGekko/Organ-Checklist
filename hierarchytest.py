@@ -1,332 +1,359 @@
 import unittest
 
-from hierarchysearch import initialize_body, parse_user_input
+import hierarchysearch
+
 from hierarchysearch import Body, BodyPart
 
-# try to mock things
 
-# Tests to Create
-#   If no root
-#   If size of tree == 1
-#   If tree has three children
-#   If depth > 1
-#   With the 'for the' format
-#   
-#   Each of this for the following:
-#
-#   initialize_body()
-#       must assert if true
-#
-#   parse_user_input()
-#       check if returning expected output
-#
-#   main()
-#       check userinput for each instance
-#           select
-#           deselect
-#           quit
-#           enter
-#           other
+class TestAddChildMethods(unittest.TestCase):
+    def setUp(self):
+        self.index_finger = BodyPart('Index Finger')
+        self.ring_finger = BodyPart('Ring Finger')
+        
 
+    def test_add_child_on_constructor(self):
+        self.arm = BodyPart('Arm', [self.index_finger, self.ring_finger])
 
-class TestFloatingMethods(unittest.TestCase):
+        # checks if all children are added
+        self.assertTrue(len(self.arm.children) == 2)
+        self.assertTrue(self.arm.children[0] == self.index_finger)
+        self.assertTrue(self.arm.children[1] == self.ring_finger)
 
     
-    def test_initialize_body(self):
-        pass
+    def test_add_child_dynamically(self):
+        self.arm = BodyPart('Arm')
+        self.arm.add_child(self.index_finger)
+        self.arm.add_child(self.ring_finger)
 
+        # checks if all children are added
+        self.assertTrue(len(self.arm.children) == 2)
+        self.assertTrue(self.arm.children[0] == self.index_finger)
+        self.assertTrue(self.arm.children[1] == self.ring_finger)
     
-    def test_parse_user_input(self):
-        pass
+    
+class TestInitialBodyMethods(unittest.TestCase):
+    INITIAL_STATE = ('[ ] Chest'
+    + '\n\t[ ] Lungs'
+    + '\n\t\t[ ] Right Lung'
+    + '\n\t\t\t[ ] Superior Lobe'
+    + '\n\t\t\t[ ] Middle Lobe'
+    + '\n\t\t\t[ ] Inferior Lobe'
+    + '\n\t\t[ ] Left Lung'
+    + '\n\t\t\t[ ] Superior Lobe'
+    + '\n\t\t\t[ ] Middle Lobe'
+    + '\n\t[ ] Heart'
+    + '\n\t\t[ ] Left Ventricle'
+    + '\n\t\t[ ] Right Ventricle'
+    + '\n\t\t[ ] Left Aorta'
+    + '\n\t\t[ ] Right Aorta'
+    + '\n\t\t[ ] Septum'
+    )
+
+    def setUp(self):
+        self.body = hierarchysearch.initialize_body()
+
+
+    def test_get_state(self):
+        self.assertEqual(self.body.get_state(), self.INITIAL_STATE)
+
+
+    def test_has_part(self):
+        self.assertTrue(self.body.has_part('middle lobe'))
+
 
 
 class TestSelectMethods(unittest.TestCase):
 
-
     ROOT_TEST = 'Chest'
     ALL_UPPER = ROOT_TEST.upper()
     ALL_LOWER = ROOT_TEST.lower()
     ONE_LEVEL_IN = 'Lungs'
     CHILD_UNDER_MULTIPLE_PARENTS = 'Superior Lobe'
-    SPECIFIC_CHILD_UNDER_MULTIPLE_PARENTS = ('Superior Lobe of the ' + 
-                                            'Left Lung')
+    SPECIFIC_CHILD = ['Superior Lobe', 'left lung']
+    NONEXISTENT_CHILD = 'Toes'
 
     ALL_DESELECTED = ('[ ] Chest'
-    + '\t[ ] Lungs'
-    + '\t\t[ ] Right Lungs'
-    + '\t\t\t[ ] Superior Lobe'
-    + '\t\t\t[ ] Middle Lobe'
-    + '\t\t\t[ ] Inferior Lobe'
-    + '\t\t[ ] Left Lungs'
-    + '\t[ ] Heart'
-    + '\t\t[ ] Left Ventricle'
-    + '\t\t[ ] Right Ventricle'
-    + '\t\t[ ] Left Aorta'
-    + '\t\t[ ] Right Aorta'
-    + '\t\t[ ] Septum'
+    + '\n\t[ ] Lungs'
+    + '\n\t\t[ ] Right Lung'
+    + '\n\t\t\t[ ] Superior Lobe'
+    + '\n\t\t\t[ ] Middle Lobe'
+    + '\n\t\t\t[ ] Inferior Lobe'
+    + '\n\t\t[ ] Left Lung'
+    + '\n\t\t\t[ ] Superior Lobe'
+    + '\n\t\t\t[ ] Middle Lobe'
+    + '\n\t[ ] Heart'
+    + '\n\t\t[ ] Left Ventricle'
+    + '\n\t\t[ ] Right Ventricle'
+    + '\n\t\t[ ] Left Aorta'
+    + '\n\t\t[ ] Right Aorta'
+    + '\n\t\t[ ] Septum'
     )
 
     SELECT_ROOT = ('[X] Chest'
-    + '\t[ ] Lungs'
-    + '\t\t[ ] Right Lungs'
-    + '\t\t\t[ ] Superior Lobe'
-    + '\t\t\t[ ] Middle Lobe'
-    + '\t\t\t[ ] Inferior Lobe'
-    + '\t\t[ ] Left Lungs'
-    + '\t[ ] Heart'
-    + '\t\t[ ] Left Ventricle'
-    + '\t\t[ ] Right Ventricle'
-    + '\t\t[ ] Left Aorta'
-    + '\t\t[ ] Right Aorta'
-    + '\t\t[ ] Septum'
+    + '\n\t[ ] Lungs'
+    + '\n\t\t[ ] Right Lung'
+    + '\n\t\t\t[ ] Superior Lobe'
+    + '\n\t\t\t[ ] Middle Lobe'
+    + '\n\t\t\t[ ] Inferior Lobe'
+    + '\n\t\t[ ] Left Lung'
+    + '\n\t\t\t[ ] Superior Lobe'
+    + '\n\t\t\t[ ] Middle Lobe'
+    + '\n\t[ ] Heart'
+    + '\n\t\t[ ] Left Ventricle'
+    + '\n\t\t[ ] Right Ventricle'
+    + '\n\t\t[ ] Left Aorta'
+    + '\n\t\t[ ] Right Aorta'
+    + '\n\t\t[ ] Septum'
     )
 
     SELECT_ONE_LEVEL_IN = ('[X] Chest'
-    + '\t[X] Lungs'
-    + '\t\t[ ] Right Lungs'
-    + '\t\t\t[ ] Superior Lobe'
-    + '\t\t\t[ ] Middle Lobe'
-    + '\t\t\t[ ] Inferior Lobe'
-    + '\t\t[ ] Left Lungs'
-    + '\t[ ] Heart'
-    + '\t\t[ ] Left Ventricle'
-    + '\t\t[ ] Right Ventricle'
-    + '\t\t[ ] Left Aorta'
-    + '\t\t[ ] Right Aorta'
-    + '\t\t[ ] Septum'
+    + '\n\t[X] Lungs'
+    + '\n\t\t[ ] Right Lung'
+    + '\n\t\t\t[ ] Superior Lobe'
+    + '\n\t\t\t[ ] Middle Lobe'
+    + '\n\t\t\t[ ] Inferior Lobe'
+    + '\n\t\t[ ] Left Lung'
+    + '\n\t\t\t[ ] Superior Lobe'
+    + '\n\t\t\t[ ] Middle Lobe'
+    + '\n\t[ ] Heart'
+    + '\n\t\t[ ] Left Ventricle'
+    + '\n\t\t[ ] Right Ventricle'
+    + '\n\t\t[ ] Left Aorta'
+    + '\n\t\t[ ] Right Aorta'
+    + '\n\t\t[ ] Septum'
     )
 
     SELECT_CHILD = ('[X] Chest'
-    + '\t[X] Lungs'
-    + '\t\t[X] Right Lung'
-    + '\t\t\t[X] Superior Lobe'
-    + '\t\t\t[ ] Middle Lobe'
-    + '\t\t\t[ ] Inferior Lobe'
-    + '\t\t[X] Left Lung'
-    + '\t\t\t[X] Superior Lobe'
-    + '\t\t\t[ ] Middle Lobe'
-    + '\t[ ] Heart'
-    + '\t\t[ ] Left Ventricle'
-    + '\t\t[ ] Right Ventricle'
-    + '\t\t[ ] Left Aorta'
-    + '\t\t[ ] Right Aorta'
-    + '\t\t[ ] Septum'
+    + '\n\t[X] Lungs'
+    + '\n\t\t[X] Right Lung'
+    + '\n\t\t\t[X] Superior Lobe'
+    + '\n\t\t\t[ ] Middle Lobe'
+    + '\n\t\t\t[ ] Inferior Lobe'
+    + '\n\t\t[X] Left Lung'
+    + '\n\t\t\t[X] Superior Lobe'
+    + '\n\t\t\t[ ] Middle Lobe'
+    + '\n\t[ ] Heart'
+    + '\n\t\t[ ] Left Ventricle'
+    + '\n\t\t[ ] Right Ventricle'
+    + '\n\t\t[ ] Left Aorta'
+    + '\n\t\t[ ] Right Aorta'
+    + '\n\t\t[ ] Septum'
     )
 
     SELECT_SPECIFIC_CHILD = ('[X] Chest'
-    + '\t[X] Lungs'
-    + '\t\t[] Right Lung'
-    + '\t\t\t[] Superior Lobe'
-    + '\t\t\t[ ] Middle Lobe'
-    + '\t\t\t[ ] Inferior Lobe'
-    + '\t\t[X] Left Lung'
-    + '\t\t\t[X] Superior Lobe'
-    + '\t\t\t[ ] Middle Lobe'
-    + '\t[ ] Heart'
-    + '\t\t[ ] Left Ventricle'
-    + '\t\t[ ] Right Ventricle'
-    + '\t\t[ ] Left Aorta'
-    + '\t\t[ ] Right Aorta'
-    + '\t\t[ ] Septum'
+    + '\n\t[X] Lungs'
+    + '\n\t\t[ ] Right Lung'
+    + '\n\t\t\t[ ] Superior Lobe'
+    + '\n\t\t\t[ ] Middle Lobe'
+    + '\n\t\t\t[ ] Inferior Lobe'
+    + '\n\t\t[X] Left Lung'
+    + '\n\t\t\t[X] Superior Lobe'
+    + '\n\t\t\t[ ] Middle Lobe'
+    + '\n\t[ ] Heart'
+    + '\n\t\t[ ] Left Ventricle'
+    + '\n\t\t[ ] Right Ventricle'
+    + '\n\t\t[ ] Left Aorta'
+    + '\n\t\t[ ] Right Aorta'
+    + '\n\t\t[ ] Septum'
     )
 
 
     def setUp(self):
-        self.body = initialize_body()
-
+        self.body = hierarchysearch.initialize_body()
+        
 
     def test_select_root(self):
         self.body.select(self.ROOT_TEST)
-        self.assertEquals(self.body.get_state(), self.SELECT_ROOT)
+        self.assertEqual(self.body.get_state(), self.SELECT_ROOT)
 
     
     def test_select_all_uppercase(self):
         self.body.select(self.ALL_UPPER)
-        self.assertEquals(self.body.get_state(), self.SELECT_ROOT)
+        self.assertEqual(self.body.get_state(), self.SELECT_ROOT)
 
     
     def test_select_all_lowercase(self):
         self.body.select(self.ALL_LOWER)
-        self.assertEquals(self.body.get_state(), self.SELECT_ROOT)
+        self.assertEqual(self.body.get_state(), self.SELECT_ROOT)
 
 
     def test_select_child_one_level_in(self):
         self.body.select(self.ONE_LEVEL_IN)
-        self.assertEquals(self.body.get_state(), self.SELECT_ONE_LEVEL_IN)
+        self.assertEqual(self.body.get_state(), self.SELECT_ONE_LEVEL_IN)
 
 
     def test_select_child_that_appears_under_multiple_parents(self):
         self.body.select(self.CHILD_UNDER_MULTIPLE_PARENTS)
-        self.assertEquals(self.body.get_state(), self.SELECT_CHILD)
+        self.assertEqual(self.body.get_state(), self.SELECT_CHILD)
 
 
     def test_select_child_with_specific_parent(self):
-        self.body.select(self.SPECIFIC_CHILD_UNDER_MULTIPLE_PARENTS)
-        self.assertEquals(self.body.get_state(), 
+        self.body.select(self.SPECIFIC_CHILD[0], self.SPECIFIC_CHILD[1])
+        self.assertEqual(self.body.get_state(), 
                             self.SELECT_SPECIFIC_CHILD)
+
+
+    def test_select_nonexistent_child(self):
+        self.body.select(self.NONEXISTENT_CHILD)
+        self.assertEqual(self.body.get_state(), self.ALL_DESELECTED)
 
 
 
 class TestDeselectMethods(unittest.TestCase):
+    ALL_UPPERCASE = "SEPTUM"
+    CHILD_WITH_CHILDREN = 'Right Lung'
+    CHILD_WITHOUT_CHILDREN = 'Inferior Lobe'
+    CHILD_UNDER_MULTIPLE_PARENTS = 'Middle Lobe'
+    SPECIFIC_CHILD = ['Superior Lobe', 'right lung']
+    NONEXISTENT_CHILD = "Armpit"
 
-    ROOT_TEST = 'Chest'
-    ALL_UPPER = ROOT_TEST.upper()
-    ALL_LOWER = ROOT_TEST.lower()
-    ONE_LEVEL_IN = 'Lungs'
-    CHILD_UNDER_MULTIPLE_PARENTS = 'Superior Lobe'
-    SPECIFIC_CHILD_UNDER_MULTIPLE_PARENTS = ('Superior Lobe of the ' + 
-                                            'Left Lung')
+    ALL_SELECTED = ('[X] Chest'
+    + '\n\t[X] Lungs'
+    + '\n\t\t[X] Right Lung'
+    + '\n\t\t\t[X] Superior Lobe'
+    + '\n\t\t\t[X] Middle Lobe'
+    + '\n\t\t\t[X] Inferior Lobe'
+    + '\n\t\t[X] Left Lung'
+    + '\n\t\t\t[X] Superior Lobe'
+    + '\n\t\t\t[X] Middle Lobe'
+    + '\n\t[X] Heart'
+    + '\n\t\t[X] Left Ventricle'
+    + '\n\t\t[X] Right Ventricle'
+    + '\n\t\t[X] Left Aorta'
+    + '\n\t\t[X] Right Aorta'
+    + '\n\t\t[X] Septum'
+    )
 
-    ALL_DESELECTED = ('[X] Chest'
-    + '\t[X] Lungs'
-    + '\t\t[X] Right Lungs'
-    + '\t\t\t[X] Superior Lobe'
-    + '\t\t\t[X] Middle Lobe'
-    + '\t\t\t[X] Inferior Lobe'
-    + '\t\t[X] Left Lungs'
-    + '\t[X] Heart'
-    + '\t\t[X] Left Ventricle'
-    + '\t\t[X] Right Ventricle'
-    + '\t\t[X] Left Aorta'
-    + '\t\t[X] Right Aorta'
-    + '\t\t[X] Septum'
+    DESELECT_ALL_UPPER = ('[X] Chest'
+    + '\n\t[X] Lungs'
+    + '\n\t\t[X] Right Lung'
+    + '\n\t\t\t[X] Superior Lobe'
+    + '\n\t\t\t[X] Middle Lobe'
+    + '\n\t\t\t[X] Inferior Lobe'
+    + '\n\t\t[X] Left Lung'
+    + '\n\t\t\t[X] Superior Lobe'
+    + '\n\t\t\t[X] Middle Lobe'
+    + '\n\t[X] Heart'
+    + '\n\t\t[X] Left Ventricle'
+    + '\n\t\t[X] Right Ventricle'
+    + '\n\t\t[X] Left Aorta'
+    + '\n\t\t[X] Right Aorta'
+    + '\n\t\t[ ] Septum'
     )
 
     DESELECT_CHILD_WITH_CHILDREN = ('[X] Chest'
-    + '\t[X] Lungs'
-    + '\t\t[X] Right Lungs'
-    + '\t\t\t[X] Superior Lobe'
-    + '\t\t\t[X] Middle Lobe'
-    + '\t\t\t[X] Inferior Lobe'
-    + '\t\t[X] Left Lungs'
-    + '\t[X] Heart'
-    + '\t\t[X] Left Ventricle'
-    + '\t\t[X] Right Ventricle'
-    + '\t\t[X] Left Aorta'
-    + '\t\t[X] Right Aorta'
-    + '\t\t[X] Septum'
+    + '\n\t[X] Lungs'
+    + '\n\t\t[ ] Right Lung'
+    + '\n\t\t\t[ ] Superior Lobe'
+    + '\n\t\t\t[ ] Middle Lobe'
+    + '\n\t\t\t[ ] Inferior Lobe'
+    + '\n\t\t[X] Left Lung'
+    + '\n\t\t\t[X] Superior Lobe'
+    + '\n\t\t\t[X] Middle Lobe'
+    + '\n\t[X] Heart'
+    + '\n\t\t[X] Left Ventricle'
+    + '\n\t\t[X] Right Ventricle'
+    + '\n\t\t[X] Left Aorta'
+    + '\n\t\t[X] Right Aorta'
+    + '\n\t\t[X] Septum'
     )
 
     DESELECT_CHILD_WITHOUT_CHILDREN = ('[X] Chest'
-    + '\t[X] Lungs'
-    + '\t\t[ ] Right Lungs'
-    + '\t\t\t[ ] Superior Lobe'
-    + '\t\t\t[ ] Middle Lobe'
-    + '\t\t\t[ ] Inferior Lobe'
-    + '\t\t[ ] Left Lungs'
-    + '\t[ ] Heart'
-    + '\t\t[ ] Left Ventricle'
-    + '\t\t[ ] Right Ventricle'
-    + '\t\t[ ] Left Aorta'
-    + '\t\t[ ] Right Aorta'
-    + '\t\t[ ] Septum'
+    + '\n\t[X] Lungs'
+    + '\n\t\t[X] Right Lung'
+    + '\n\t\t\t[X] Superior Lobe'
+    + '\n\t\t\t[X] Middle Lobe'
+    + '\n\t\t\t[ ] Inferior Lobe'
+    + '\n\t\t[X] Left Lung'
+    + '\n\t\t\t[X] Superior Lobe'
+    + '\n\t\t\t[X] Middle Lobe'
+    + '\n\t[X] Heart'
+    + '\n\t\t[X] Left Ventricle'
+    + '\n\t\t[X] Right Ventricle'
+    + '\n\t\t[X] Left Aorta'
+    + '\n\t\t[X] Right Aorta'
+    + '\n\t\t[X] Septum'
     )
 
     DESELECT_SPECIFIC_CHILD = ('[X] Chest'
-    + '\t[X] Lungs'
-    + '\t\t[X] Right Lung'
-    + '\t\t\t[X] Superior Lobe'
-    + '\t\t\t[ ] Middle Lobe'
-    + '\t\t\t[ ] Inferior Lobe'
-    + '\t\t[X] Left Lung'
-    + '\t\t\t[X] Superior Lobe'
-    + '\t\t\t[ ] Middle Lobe'
-    + '\t[ ] Heart'
-    + '\t\t[ ] Left Ventricle'
-    + '\t\t[ ] Right Ventricle'
-    + '\t\t[ ] Left Aorta'
-    + '\t\t[ ] Right Aorta'
-    + '\t\t[ ] Septum'
+    + '\n\t[X] Lungs'
+    + '\n\t\t[X] Right Lung'
+    + '\n\t\t\t[ ] Superior Lobe'
+    + '\n\t\t\t[X] Middle Lobe'
+    + '\n\t\t\t[X] Inferior Lobe'
+    + '\n\t\t[X] Left Lung'
+    + '\n\t\t\t[X] Superior Lobe'
+    + '\n\t\t\t[X] Middle Lobe'
+    + '\n\t[X] Heart'
+    + '\n\t\t[X] Left Ventricle'
+    + '\n\t\t[X] Right Ventricle'
+    + '\n\t\t[X] Left Aorta'
+    + '\n\t\t[X] Right Aorta'
+    + '\n\t\t[X] Septum'
     )
 
     DESELECT_CHILD_WITH_MULTIPLE_INSTANCES = ('[X] Chest'
-    + '\t[X] Lungs'
-    + '\t\t[] Right Lung'
-    + '\t\t\t[] Superior Lobe'
-    + '\t\t\t[ ] Middle Lobe'
-    + '\t\t\t[ ] Inferior Lobe'
-    + '\t\t[X] Left Lung'
-    + '\t\t\t[X] Superior Lobe'
-    + '\t\t\t[ ] Middle Lobe'
-    + '\t[ ] Heart'
-    + '\t\t[ ] Left Ventricle'
-    + '\t\t[ ] Right Ventricle'
-    + '\t\t[ ] Left Aorta'
-    + '\t\t[ ] Right Aorta'
-    + '\t\t[ ] Septum'
+    + '\n\t[X] Lungs'
+    + '\n\t\t[X] Right Lung'
+    + '\n\t\t\t[X] Superior Lobe'
+    + '\n\t\t\t[ ] Middle Lobe'
+    + '\n\t\t\t[X] Inferior Lobe'
+    + '\n\t\t[X] Left Lung'
+    + '\n\t\t\t[X] Superior Lobe'
+    + '\n\t\t\t[ ] Middle Lobe'
+    + '\n\t[X] Heart'
+    + '\n\t\t[X] Left Ventricle'
+    + '\n\t\t[X] Right Ventricle'
+    + '\n\t\t[X] Left Aorta'
+    + '\n\t\t[X] Right Aorta'
+    + '\n\t\t[X] Septum'
     )
 
 
     def setUp(self):
-        self.body = initialize_body()
+        self.body = hierarchysearch.initialize_body()
         self.body.select('superior lobe')
         self.body.select('inferior lobe')
-        self.body.select('middle lobe lobe')
+        self.body.select('middle lobe')
         self.body.select('left ventricle')
         self.body.select('right ventricle')
         self.body.select('left aorta')
         self.body.select('right aorta')
+        self.body.select('septum')
 
 
-    def test_deselect_root(self):
-        self.body.deselect(self.ROOT_TEST)
-        self.assertEquals(self.body.get_state(), self.ALL_DESELECTED)
+    def test_deselect_allupper(self):
+        self.body.deselect(self.ALL_UPPERCASE)
+        self.assertEqual(self.body.get_state(), self.DESELECT_ALL_UPPER)
+
+
+    def test_deselect_child_with_children(self):
+        self.body.deselect(self.CHILD_WITH_CHILDREN)
+        self.assertEqual(self.body.get_state(), 
+                            self.DESELECT_CHILD_WITH_CHILDREN)
+
+
+    def test_deselect_child_without_children(self):
+        self.body.deselect(self.CHILD_WITHOUT_CHILDREN)
+        self.assertEqual(self.body.get_state(), 
+                            self.DESELECT_CHILD_WITHOUT_CHILDREN)
 
     
-    def test_deselect_all_uppercase(self):
-        self.body.deselect(self.ALL_UPPER)
-        self.assertEquals(self.body.get_state(), self.SELECT_ROOT)
-
-    
-    def test_deselect_all_lowercase(self):
-        self.body.deselect(self.ALL_LOWER)
-        self.assertEquals(self.body.get_state(), self.SELECT_ROOT)
-
-
-    def test_deselect_child_one_level_in(self):
-        self.body.deselect(self.ONE_LEVEL_IN)
-        self.assertEquals(self.body.get_state(), self.SELECT_ONE_LEVEL_IN)
+    def test_deselect_child_with_specific_parent(self):
+        self.body.deselect(self.SPECIFIC_CHILD[0], self.SPECIFIC_CHILD[1])
+        self.assertEqual(self.body.get_state(),
+                            self.DESELECT_SPECIFIC_CHILD)
 
 
     def test_deselect_child_that_appears_under_multiple_parents(self):
         self.body.deselect(self.CHILD_UNDER_MULTIPLE_PARENTS)
-        self.assertEquals(self.body.get_state(), self.DESELECT_CHILD)
+        self.assertEqual(self.body.get_state(), 
+                            self.DESELECT_CHILD_WITH_MULTIPLE_INSTANCES)
 
 
-
-    def test_deselect_child_with_specific_parent(self):
-        self.body.deselect(self.SPECIFIC_CHILD_UNDER_MULTIPLE_PARENTS)
-        self.assertEquals(self.body.get_state(), 
-                            self.DESELECT_SPECIFIC_CHILD)
-
-
-class TestBodyPartMethods(unittest.TestCase):
-    pass
-
-    """ to be implemented
-    def test_constructor(self):
-        pass
-
-
-    def test_add_internal(self):
-        pass
-
-
-    def test_select(self):
-        pass
-
-
-    def test_deselect(self):
-        pass
-    
-
-    def test_print_state(self):
-        pass
-
-
-    def test_is_part(self):
-        pass
-    """
+    def test_deselect_nonexistent_child(self):
+        self.body.select(self.NONEXISTENT_CHILD)
+        self.assertEqual(self.body.get_state(), self.ALL_SELECTED)
 
 
 if __name__ == '__main__':
